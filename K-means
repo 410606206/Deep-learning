@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+double points[1024][2],centers[1024][2],dis[1024],sumx[1024],sumy[1024];
+int size,type,group[1024],oldGroup[1024],number[1024];
+void changeCenter(){
+	while(true){
+		for(int i=0;i<size;i++){
+			oldGroup[i] = group[i]; //紀錄舊的分群
+		}
+		for(int i=0;i<size;i++){
+			double min = DBL_MAX;
+			//算每個點和中心的距離並分類
+			for(int j=0;j<type;j++){ 
+				double tmpx=points[i][0]-centers[j][0],tmpy=points[i][1]-centers[j][1];
+				dis[j] = tmpx*tmpx+tmpy*tmpy; //兩點距離公式
+				if(min > dis[j]){
+					min=dis[j];
+					group[i]=j; //第i個點是在第j群，更新分群
+				}
+			}
+		}
+		//檢查是否和舊的分群一模一樣
+		bool ok=true;
+		for(int i=0;i<size;i++){
+			if(group[i]!=oldGroup[i]){
+				ok=false;
+				break;
+			}
+		}	
+		if(ok) break;
+		
+		//算中心點
+		for(int i=0;i<type;i++){
+			sumx[i]=0;
+			sumy[i]=0;
+		}
+		for(int i=0;i<type;i++) number[i]=0;
+	
+		for(int i=0;i<size;i++){
+			sumx[group[i]]+=points[i][0]; //一群中x的總和
+			sumy[group[i]]+=points[i][1]; //一群中y的總和
+			number[group[i]]++; //一群有多少點
+		}
+		for(int i=0;i<type;i++){
+			if(number[i] != 0){
+				centers[i][0] = sumx[i]/number[i];
+				centers[i][1] = sumy[i]/number[i];
+			}
+		}
+		
+	}
+}
+int cmp(const void *a,const void *b){
+	if(((double*)a)[0]==((double*)b)[0]){
+		return ((double*)a)[1]-((double*)b)[1];
+	}
+	else return ((double*)a)[0]-((double*)b)[0];
+    
+}
+int main()
+{
+    // Put your code below
+	bool first = true;
+	while(scanf("%d%d",&size,&type)!=EOF){
+		if(!size&&!type) break;
+		if(!first) cout<<endl;
+		first = false;
+		for(int i=0;i<type;i++){
+			scanf("%lf%lf",&centers[i][0],&centers[i][1]);	//中心input ，共有type多個
+		}
+		for(int i=0;i<size;i++){
+			scanf("%lf%lf",&points[i][0],&points[i][1]);	//點input //共有size個
+		}
+		changeCenter();
+	//	for(int i=0;i<type;i++) cout<<number[i]<<" ";
+	//	cout<<endl;
+		qsort(centers,type,sizeof(double)*2,cmp);
+		for(int i=0;i<type;i++){
+			printf("%.2lf %.2lf\n",centers[i][0],centers[i][1]);
+		}
+	}
+    return 0;
+}
